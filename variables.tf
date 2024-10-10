@@ -62,10 +62,10 @@ variable "eventhub_namespace_name" {
   type        = string
 }
 
-variable "eventhub_name" {
-  description = "(Required) Specifies the name of the EventHub resource. Changing this forces a new resource to be created."
-  type        = string
-}
+#variable "eventhub_name" {
+#  description = "(Required) Specifies the name of the EventHub resource. Changing this forces a new resource to be created."
+#  type        = string
+#}
 
 variable "sku" {
   description = "(Required) Defines which tier to use. Valid options are Basic and Standard."
@@ -124,15 +124,15 @@ variable "network_rulesets" {
   }))
 }
 
-variable "partition_count" {
-  description = "(Required) Specifies the current number of shards on the Event Hub. Changing this forces a new resource to be created."
-  type        = number
-}
-
-variable "message_retention" {
-  description = "(Required) Specifies the number of days to retain the events for this Event Hub."
-  type        = number
-}
+#variable "partition_count" {
+#  description = "(Required) Specifies the current number of shards on the Event Hub. Changing this forces a new resource to be created."
+#  type        = number
+#}
+#
+#variable "message_retention" {
+#  description = "(Required) Specifies the number of days to retain the events for this Event Hub."
+#  type        = number
+#}
 
 variable "public_network_access_enabled" {
   description = "(Optional) Is Public Network Access enabled for the EventHub Namespace?"
