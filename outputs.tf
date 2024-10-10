@@ -1,7 +1,7 @@
 output "eventhub_namespace_name" {
-  value = azurerm_eventhub_namespace.main.name
+  value = azurerm_eventhub_namespace.eventhub.name
 }
 
 output "eventhub_name" {
-  value = azurerm_eventhub.main.name
+  value = [for hub in azurerm_eventhub.events : hub.name]
 }

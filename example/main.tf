@@ -55,13 +55,11 @@ module "eventhub" {
   resource_group_name      = azurerm_resource_group.test.name
   location                 = var.location
   eventhub_namespace_name  = var.eventhub_namespace_name
-  eventhub_name            = var.eventhub_name
+  hubs                     = var.hubs
   sku                      = var.sku
   capacity                 = var.capacity
   auto_inflate_enabled     = var.auto_inflate_enabled
   maximum_throughput_units = var.maximum_throughput_units
-  message_retention        = var.message_retention
   network_rulesets         = local.network_rulesets
-  partition_count          = var.partition_count
   tags                     = module.tag_set.tags
 }
