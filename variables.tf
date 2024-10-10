@@ -160,28 +160,26 @@ variable "identity" {
 
 variable "authorization_rules" {
   description = "Authorization rules to add to the namespace. For hub use `hubs` variable to add authorization keys."
-  type = list(object({
-    name   = string
+  type = map(object({
     listen = bool
     send   = bool
     manage = bool
   }))
-  default = []
+  default = {}
 }
 
 variable "hubs" {
-  description = "A list of event hubs to add to namespace."
-  type = list(object({
-    name              = string
+  type = map(object({
     partitions        = number
     message_retention = number
-    consumers         = list(string)
-    keys = list(object({
-      name   = string
+    consumers         = optional(list(string), [])
+    keys = optional(map(object({
       listen = bool
       send   = bool
       manage = bool
-    }))
+    })), {})
   }))
-  default = []
+
+  description = "A map of hubs, where the key is the hub name and each hub contains partitions, message_retention, a list of consumers, and keys for each consumer."
+
 }

@@ -1,27 +1,41 @@
+
 locals {
-  consumers = { for hc in flatten([for h in var.hubs :
-    [for c in h.consumers : {
-      hub  = h.name
-      name = c
-    }]]) : format("%s.%s", hc.hub, hc.name) => hc }
+  consumer_groups = {
+    for item in flatten([
+      for hub_key, hub_value in var.hubs : [
+        for consumer in hub_value.consumers : {
+          consumer   = consumer
+          hub        = hub_key
+          unique_key = "${consumer}_${hub_key}"
+        }
+      ]
+    ]) : item.unique_key => item
+  }
 
-  keys = { for hk in flatten([for h in var.hubs :
-    [for k in h.keys : {
-      hub = h.name
-      key = k
-    }]]) : format("%s.%s", hk.hub, hk.key.name) => hk }
-
-  hubs                = { for h in var.hubs : h.name => h }
-  authorization_rules = { for a in var.authorization_rules : a.name => a }
-
-
+  authorization_rules = {
+    for item in flatten([
+      for hub_key, hub_value in var.hubs :
+      [
+        for app_key, app_value in hub_value.keys :
+        {
+          key         = "${hub_key}_${app_key}" # Unique key for each rule
+          hub_name    = hub_key                 # Hub name
+          permissions = app_value               # Permissions object
+        }
+      ]
+      ]) : item.key => {
+      hub_name    = item.hub_name
+      permissions = item.permissions
+    }
+  }
 }
 
 
+
 resource "azurerm_eventhub_namespace" "eventhub" {
-  name                = var.eventhub_namespace_name
-  resource_group_name = var.resource_group_name
-  location            = var.location
+  name                 = var.eventhub_namespace_name
+  resource_group_name  = var.resource_group_name
+  location             = var.location
   sku                  = var.sku
   capacity             = var.capacity
   auto_inflate_enabled = var.auto_inflate_enabled
@@ -68,7 +82,7 @@ resource "azurerm_eventhub_namespace" "eventhub" {
 }
 
 resource "azurerm_eventhub" "events" {
-  for_each = local.hubs
+  for_each = var.hubs
 
   name                = each.key
   namespace_name      = azurerm_eventhub_namespace.eventhub.name
@@ -79,7 +93,7 @@ resource "azurerm_eventhub" "events" {
 
 
 resource "azurerm_eventhub_namespace_authorization_rule" "events" {
-  for_each = local.authorization_rules
+  for_each = var.authorization_rules
 
   name                = each.key
   namespace_name      = azurerm_eventhub_namespace.eventhub.name
@@ -91,9 +105,9 @@ resource "azurerm_eventhub_namespace_authorization_rule" "events" {
 }
 
 resource "azurerm_eventhub_consumer_group" "events" {
-  for_each = local.consumers
+  for_each = local.consumer_groups
 
-  name                = each.value.name
+  name                = each.value.consumer
   namespace_name      = azurerm_eventhub_namespace.eventhub.name
   eventhub_name       = each.value.hub
   resource_group_name = var.resource_group_name
@@ -102,16 +116,16 @@ resource "azurerm_eventhub_consumer_group" "events" {
 }
 
 resource "azurerm_eventhub_authorization_rule" "events" {
-  for_each = local.keys
+  for_each = local.authorization_rules
 
-  name                = each.value.key.name
+  name                = each.key
   namespace_name      = azurerm_eventhub_namespace.eventhub.name
-  eventhub_name       = each.value.hub
+  eventhub_name       = each.value.hub_name
   resource_group_name = var.resource_group_name
 
-  listen = each.value.key.listen
-  send   = each.value.key.send
-  manage = each.value.key.manage
+  listen = each.value.permissions.listen
+  send   = each.value.permissions.send
+  manage = each.value.permissions.manage
 
   depends_on = [azurerm_eventhub.events]
 }

@@ -74,10 +74,6 @@ variable "eventhub_namespace_name" {
   type        = string
 }
 
-variable "eventhub_name" {
-  description = "(Required) Specifies the name of the Eventhub."
-  type        = string
-}
 
 variable "sku" {
   description = "(Required) Specifies the SKU of the Eventhub."
@@ -99,12 +95,18 @@ variable "maximum_throughput_units" {
   type        = number
 }
 
-variable "partition_count" {
-  description = "(Required) Specifies the partition count for the Eventhub."
-  type        = number
-}
+variable "hubs" {
+  type = map(object({
+    partitions        = number
+    message_retention = number
+    consumers         = optional(list(string), [])
+    keys = optional(map(object({
+      listen = bool
+      send   = bool
+      manage = bool
+    })), {})
+  }))
 
-variable "message_retention" {
-  description = "(Required) Specifies the message retention period for the Eventhub."
-  type        = number
+  description = "A map of hubs, where the key is the hub name and each hub contains partitions, message_retention, a list of consumers, and keys for each consumer."
+
 }
