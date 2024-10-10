@@ -107,6 +107,6 @@ variable "hubs" {
     })), {})
   }))
 
-  description = "A map of hubs, where the key is the hub name and each hub contains partitions, message_retention, a list of consumers, and keys for each consumer."
+  description = "A map of hubs, where the key is the hub name and each hub contains partitions, message_retention, a list of consumers, and authorisation rules(key is the name and the permissions)."
 
 }
