@@ -44,7 +44,7 @@ func TestTerraformAzureEventHub(t *testing.T) {
 	// Get outputs from Terraform
 	resourceGroupName := terraform.Output(t, terraformOptions, "resource_group_name")
 	eventHubNamespaceName := terraform.Output(t, terraformOptions, "eventhub_namespace_name")
-	eventHubName := terraform.OutputList(t, terraformOptions, "eventhub_name")
+	eventHubNames := terraform.OutputList(t, terraformOptions, "eventhub_name")
 	subscriptionID := terraform.Output(t, terraformOptions, "subscription_id")
 
 	// Check if the Event Hub Namespace exists
