@@ -44,7 +44,7 @@ func TestTerraformAzureEventHub(t *testing.T) {
 	// Get outputs from Terraform
 	resourceGroupName := terraform.Output(t, terraformOptions, "resource_group_name")
 	eventHubNamespaceName := terraform.Output(t, terraformOptions, "eventhub_namespace_name")
-	eventHubName := terraform.Output(t, terraformOptions, "eventhub_name")
+	eventHubName := terraform.OutputList(t, terraformOptions, "eventhub_name")
 	subscriptionID := terraform.Output(t, terraformOptions, "subscription_id")
 
 	// Check if the Event Hub Namespace exists
@@ -58,17 +58,19 @@ func TestTerraformAzureEventHub(t *testing.T) {
 	assert.Equal(t, eventHubNamespaceName, *namespace.Name)
 	assert.Equal(t, "Standard", string(namespace.Sku.Name))
 
-	// Check if the Event Hub exists within the namespace
-	eventHubExists := EventHubExists(t, resourceGroupName, eventHubNamespaceName, eventHubName, subscriptionID)
-	assert.True(t, eventHubExists, "Event Hub does not exist")
+    for _, eventHubName := range eventHubNames {
+        // Check if the Event Hub exists within the namespace
+        eventHubExists := EventHubExists(t, resourceGroupName, eventHubNamespaceName, eventHubName, subscriptionID)
+        assert.True(t, eventHubExists, "Event Hub does not exist")
 
-	// Get the Event Hub details
-	eventHub := GetEventHub(t, resourceGroupName, eventHubNamespaceName, eventHubName, subscriptionID)
+        // Get the Event Hub details
+        eventHub := GetEventHub(t, resourceGroupName, eventHubNamespaceName, eventHubName, subscriptionID)
 
-	// Assert properties of the Event Hub
-	assert.Equal(t, eventHubName, *eventHub.Name)
-	// For example, check the partition count
-	assert.Equal(t, int64(2), *eventHub.PartitionCount)
+        // Assert properties of the Event Hub
+        assert.Equal(t, eventHubName, *eventHub.Name)
+        // For example, check the partition count
+        assert.Equal(t, int64(2), *eventHub.PartitionCount)
+	}
 }
 
 // Custom function to check if Event Hub Namespace exists
