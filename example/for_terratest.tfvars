@@ -18,7 +18,7 @@ type        = "eventhub"
 
 hubs = {
   "eh-lab-cpp-ehterratest" = {
-    partitions        = 4
+    partitions        = 2
     message_retention = 1
   }
 }
