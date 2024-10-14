@@ -62,11 +62,6 @@ variable "eventhub_namespace_name" {
   type        = string
 }
 
-variable "eventhub_name" {
-  description = "(Required) Specifies the name of the EventHub resource. Changing this forces a new resource to be created."
-  type        = string
-}
-
 variable "sku" {
   description = "(Required) Defines which tier to use. Valid options are Basic and Standard."
   type        = string
@@ -124,18 +119,52 @@ variable "network_rulesets" {
   }))
 }
 
-variable "partition_count" {
-  description = "(Required) Specifies the current number of shards on the Event Hub. Changing this forces a new resource to be created."
-  type        = number
-}
-
-variable "message_retention" {
-  description = "(Required) Specifies the number of days to retain the events for this Event Hub."
-  type        = number
-}
-
 variable "public_network_access_enabled" {
   description = "(Optional) Is Public Network Access enabled for the EventHub Namespace?"
   default     = true
   type        = bool
+}
+
+variable "local_authentication_enabled" {
+  description = "(Optional) Is SAS authentication enabled for the EventHub Namespace?"
+  default     = true
+  type        = bool
+}
+
+variable "minimum_tls_version" {
+  description = "(Optional) The minimum supported TLS version for this EventHub Namespace. Valid values are: 1.0, 1.1 and 1.2"
+  default     = "1.2"
+  type        = string
+}
+
+variable "identity" {
+  description = "Identity block Specifies the identity to assign to function app"
+  type        = any
+  default     = {}
+}
+
+variable "authorization_rules" {
+  description = "Authorization rules to add to the namespace. For hub use `hubs` variable to add authorization keys."
+  type = map(object({
+    listen = bool
+    send   = bool
+    manage = bool
+  }))
+  default = {}
+}
+
+variable "hubs" {
+  type = map(object({
+    partitions        = number
+    message_retention = number
+    consumers         = optional(list(string), [])
+    keys = optional(map(object({
+      listen = bool
+      send   = bool
+      manage = bool
+    })), {})
+  }))
+
+  description = "A map of hubs, where the key is the hub name and each hub contains partitions, message_retention, a list of consumers, and authorisation rules(key is the name and the permissions)."
+
 }
